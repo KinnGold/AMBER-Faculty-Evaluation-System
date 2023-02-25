@@ -1,0 +1,592 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="UsersMP.master.cs" Inherits="AMBER.BM.Users.UsersMP" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server" id="PageHead">
+    <title>
+        <asp:ContentPlaceHolder ID="title" runat="server">
+        </asp:ContentPlaceHolder>
+    </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link href="../../Scripts/customscrollbar.css" rel="stylesheet" />
+    <link href="~/A.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link href="../../Content/Sidebar/sidebarst.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
+    <link href="../../Scripts/customscrollbar.css" rel="stylesheet" />
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style type="text/css">
+        #schoolProfilePic {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border: 5px solid orange;
+            border-radius: 50%;
+            background-size: 100% 100%;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+        #profilePic {
+            position: relative;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-size: 100% 100%;
+            overflow: hidden;
+        }
+        .item {
+            border: 1px solid #343A40;
+        }
+
+        .notif {
+            font-size: x-large;
+        }
+
+        .read {
+            margin-right: 227px;
+        }
+
+        .msg {
+            word-break: break-word;
+            white-space: normal;
+            text-align: justify;
+        }
+
+        .dropdown-menu-start {
+            top: 60px;
+            right: 0px;
+            left: unset;
+            width: 450px;
+            height: 360px;
+            box-shadow: 0px 5px 7px -1px #c1c1c1;
+            padding-bottom: 0px;
+            padding: 0px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
+            .dropdown-menu-start:before {
+                content: "";
+                position: absolute;
+                top: -20px;
+                right: 12px;
+                border: 10px solid #343A40;
+                border-color: transparent transparent #343A40 transparent;
+            }
+
+        .head {
+            padding: 5px 15px;
+            border-radius: 3px 3px 0px 0px;
+        }
+
+        .notification-box {
+            padding: 10px 0px;
+        }
+
+        .footer {
+            padding: 5px 15px;
+            border-radius: 0px 0px 3px 3px;
+            align-content: center;
+            position: fixed;
+        }
+
+        @media (max-width: 640px) {
+            .dropdown-menu-start {
+                top: 50px;
+                left: -16px;
+                width: 290px;
+            }
+
+            .message {
+                font-size: 13px;
+            }
+        }
+    </style>
+    <script>
+        var page = '<%= Session["temp"] %>';
+        //function clearSessionForModalEval() {
+        //    localStorage.clear();
+        //    sessionStorage.clear();
+        //}
+        function error() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Under Maintenance',
+                text: 'Something went wrong!',
+            })
+        }
+        function notFound() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Not Found',
+                text: 'User Not Found!',
+            })
+        }
+        function schoolnotFound() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Not Found',
+                text: 'School Not Found!',
+            })
+        }
+        function deptnotFound() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Not Found',
+                text: 'Department Not Found!',
+            })
+        }
+        function imagenotfound() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Not Found',
+                text: 'Image Not Found!',
+            })
+        }
+        function UpdateSuccess() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'success',
+                title: 'Password Updated Successfully',
+            })
+        }
+        function errorPass() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Oops!',
+                text: 'Password must be minimum of 8 and must contain atleast one Upper case and atleast one special character and numbers.',
+            })
+        }
+        function PassError() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Password Error!',
+                text: 'Password Does not Match!',
+            })
+        }
+        function SendSuccess() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'success',
+                title: 'Request Sent Successfully',
+            })
+        }
+        function DeleteConfirm(btnDelete) {
+
+            if (obj.status) {
+                obj.status = false;
+                return true;
+            };
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this! There will be ' + page /*count unta ni siya*/ + ' rows affected',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+                    obj.status = true;
+                    //do postback on success
+                    obj.ele.click();
+                }
+            });
+            obj.ele = btnDelete;
+            return false;
+        }
+
+        var object = {
+            status: false, ele: null
+        };
+        function LogoutConfirm(event) {
+            if (object.status) {
+                return true;
+            }
+            Swal.fire({
+                icon: 'warning',
+                title: 'Are you sure you want to logout?',
+                text: 'Your session will end.',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#FFBF00',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Log me out.'
+            }).then((result) => {
+                if (result.value) {
+                    object.status = true;
+                    object.ele = logoutbtn;
+                    //do postback on success
+                    object.ele.click();
+                }
+            });
+            return false;
+        }
+
+        function profilepicerror() {
+            Swal.fire({
+                position: 'center',
+                icon: 'warning',
+                title: 'No File Chosen!',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+
+        function fileerror() {
+            Swal.fire({
+                position: 'center',
+                icon: 'warning',
+                title: 'Invalid File Type!',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+    <link href="/Scripts/BacktoTopBTN/backTotop.css" rel="stylesheet" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-0 shadow-sm p-1 bg-white">
+                <%--<img src="/Pictures/amberlogo.png" style="height: auto; width: 100px;" class="mx-3" />--%>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                     <ul class="nav navbar-nav m-2">
+                        <li class="nav-item">
+                            <p class=" m-0 py-2">
+                                Evaluation Status:
+                                <asp:Label ID="lblstatus" Font-Bold="true" runat="server" Text="No Schedule"></asp:Label>
+                            </p>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav" style="margin-left: 44rem">
+                        <li class="nav-item m-1">
+                            <div class="dropdown show">
+                                <button class="btn btn-outline-secondary my-2 my-sm-0 dropdown-toggle border-0 align-items-center" href="#" role="button" id="dropdownMenuLink1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="badge rounded-pill badge-notification bg-danger">
+                                        <asp:Label ID="notifications1" runat="server" Text=""></asp:Label></span>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-start scrollbar-primary" aria-labelledby="dropdownMenuLink1">
+                                    <li class="dropdown-header head">
+                                        <div clas="row">
+                                            <div class="col">
+                                                <center>
+                                                    <span class="text-justify notif"><b>Notifications</b></span>
+                                                </center>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <asp:LinkButton ID="markasreadbtn" CssClass="read" OnClick="markasreadbtn_Click" runat="server">Mark All As Read</asp:LinkButton>
+                                                <asp:LinkButton ID="viewallbtn" OnClick="viewallbtn_Click" runat="server">View All</asp:LinkButton>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="notification-box">
+                                        <asp:PlaceHolder ID="plcnotifications" runat="server">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <asp:Repeater ID="Repeater1" runat="server">
+                                                        <ItemTemplate>
+                                                            <div class="dropdown-item item">
+                                                                <div class="row">
+                                                                    <div class="col">
+                                                                        <span class="message media-body">
+                                                                            <span class="name float-left" style="font-size: large;">From: <b><%#Eval("fromUser_role") %></b></span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col msg">
+                                                                        <p>
+                                                                            <%#Eval("message") %>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col">
+                                                                        <p style="font-size: smaller">
+                                                                            sent <%#Eval("DateTimeSent") %>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </ItemTemplate>
+                                                    </asp:Repeater>
+                                                </div>
+                                            </div>
+                                        </asp:PlaceHolder>
+
+                                        <asp:PlaceHolder ID="plcNOnotifications" runat="server">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <center>
+                                                        <p>
+                                                            <img src="../../../Pictures/notificationsring.png" style="height: 200px; width: 200px;" />
+
+                                                        </p>
+                                                        <h4>No Recent Notifications</h4>
+                                                    </center>
+                                                </div>
+                                            </div>
+                                        </asp:PlaceHolder>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav ms-auto mr-1" style="margin-right: 3rem">
+                        <li class="nav-item dropdown m-1">
+                            <div class="dropdown show">
+                                <button class="btn btn-outline-secondary my-2 my-sm-0 dropdown-toggle border-0 align-items-center" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <asp:Image ID="profilePic" runat="server" Width="35px" Height="35px" />
+                                    <asp:Label runat="server" CssClass="form-label" ID="lbluser"></asp:Label>
+                                </button>
+
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <asp:LinkButton ID="instructorProfile" CssClass="dropdown-item" OnClick="instructorProfile_Click" runat="server"><i class="fa fa-user"></i>&nbsp;&nbsp;Profile</asp:LinkButton>
+                                    <asp:LinkButton ID="studentProfile" CssClass="dropdown-item" OnClick="studentProfile_Click" runat="server"><i class="fa fa-user"></i>&nbsp;&nbsp;Profile</asp:LinkButton>
+                                    <asp:LinkButton ID="logoutbtn" CssClass="dropdown-item" OnClientClick="return LogoutConfirm(this);" OnClick="logoutbtn_Click" runat="server"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;Logout</asp:LinkButton>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="wrapper d-flex align-items-stretch">
+                <nav id="sidebar">
+                    <div class="custom-menu">
+                        <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                            <i class="fa fa-bars"></i>
+                            <span class="sr-only">Toggle Menu</span>
+                        </button>
+                    </div>
+                    <div class="row p-2">
+                        <center>
+                            <asp:Image ID="schoolProfilePic" runat="server" Width="140px" Height="140px" />
+                        </center>
+                        <div class="col text-center">
+                            <asp:Label runat="server" Style="font-weight:bold; font-size:large" CssClass="form-label" ID="lblschool"></asp:Label>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                            <asp:Label runat="server" Style="font-size: small;" CssClass="form-label" ID="lbluserdisplay" Text="user"></asp:Label>
+                        </div>
+                    <hr class="mx-3" />
+                    <div class="p-4" style="position: sticky; top: 0;">
+                        <%--<h1><img class="logo" src="../../Pictures/whiteCAPSTONER-Amber.png" style="max-width:100%;"/></h1>--%>
+                        <ul class="list-unstyled components mb-5">
+                            <li class="active">
+                                <asp:LinkButton ID="landingpage" OnClick="landingpage_Click" runat="server"><i class="fa-solid fa-house"></i>&nbsp;&nbsp; Home</asp:LinkButton>
+                            </li>
+                            <li>
+                                <asp:PlaceHolder ID="plcevaluation" runat="server">
+                                    <a href="#EvaluationSubMenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-list-check"></i>&nbsp;&nbsp; Evaluation</a>
+                                    <ul class="collapse list-unstyled" id="EvaluationSubMenu">
+                                        <li>
+                                            <asp:LinkButton ID="peerevalbtn" OnClick="peerevalbtn_Click" runat="server">•&nbsp;&nbsp;Peer-Evaluation</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="selfevalbtn" OnClick="selfevalbtn_Click1" runat="server">•&nbsp;&nbsp;Self-Evaluation</asp:LinkButton>
+                                        </li>
+                                    </ul>
+
+                                </asp:PlaceHolder>
+                            </li>
+                            <%--<li>
+                                <asp:LinkButton ID="peerevalbtn" OnClick="peerevalbtn_Click" runat="server">Peer-Evaluation</asp:LinkButton>
+                            </li>
+                            <li>
+                                <asp:LinkButton ID="selfevalbtn" OnClick="selfevalbtn_Click" runat="server">Self-Evaluation</asp:LinkButton>
+                            </li>--%>
+                            <li>
+                                <asp:PlaceHolder ID="plcresults" runat="server">
+                                    <a href="#ResultsSubMenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-square-poll-vertical"></i>&nbsp;&nbsp; Results</a>
+                                    <ul class="collapse list-unstyled" id="ResultsSubMenu">
+                                        <li>
+                                            <asp:LinkButton ID="resultsbtn" OnClick="resultsbtn_Click" runat="server">•&nbsp;&nbsp;Evaluation</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="skillstestresultsbtn" OnClick="skillstestresultsbtn_Click" runat="server">•&nbsp;&nbsp;Skills Test</asp:LinkButton>
+                                        </li>
+                                    </ul>
+
+                                </asp:PlaceHolder>
+                            </li>
+                            <%--<li>
+                                <asp:LinkButton ID="resultsbtn" OnClick="resultsbtn_Click" runat="server">Results</asp:LinkButton>
+                            </li>
+                            <li>
+                                <asp:LinkButton ID="rankingsbtn" runat="server">Rankings</asp:LinkButton>
+                            </li>--%>
+                            <%--<li>
+                                <asp:LinkButton ID="skillstestbtn" runat="server">Skills Test</asp:LinkButton>
+                            </li>--%>
+                            <li>
+                                <asp:PlaceHolder ID="plcDeanManage" runat="server">
+                                    <a href="#DeanManage" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-gears"></i>&nbsp;&nbsp; Manage</a>
+                                    <ul class="collapse list-unstyled" id="DeanManage">
+                                        <li>
+                                            <asp:LinkButton ID="lbtnStudent" OnClick="lbtnStudent_Click" runat="server">•&nbsp;&nbsp;Student</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="lbtnInstructor" OnClick="lbtnInstructor_Click" runat="server">•&nbsp;&nbsp;Peers/Instructors</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="lbtnSection" OnClick="lbtnSection_Click" runat="server">•&nbsp;&nbsp;Section</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="lbtnCourse" OnClick="lbtnCourse_Click" runat="server">•&nbsp;&nbsp;Course</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="lbtnSubject" OnClick="lbtnSubject_Click" runat="server">•&nbsp;&nbsp;Subject</asp:LinkButton>
+                                        </li>
+                                    </ul>
+
+                                </asp:PlaceHolder>
+                            </li>
+                            <li>
+                                <asp:LinkButton ID="rankingsbtn" OnClick="rankingsbtn_Click" runat="server"><i class="fa-solid fa-ranking-star"></i>&nbsp;&nbsp; Rankings</asp:LinkButton>
+                            </li>
+                            <li>
+                                <asp:LinkButton ID="skillstestbtn" OnClick="skillstestbtn_Click" runat="server"><i class="fa-solid fa-square-check"></i>&nbsp;&nbsp; Skills Test</asp:LinkButton>
+                            </li>
+                            <%--<li>
+                                <asp:LinkButton ID="evaluatebtn" OnClick="evaluatebtn_Click" runat="server">Evaluation</asp:LinkButton>
+                            </li>
+                            <li>
+                                <asp:LinkButton ID="evaluatebtn2" OnClick="evaluatebtn2_Click" runat="server">Evaluation2</asp:LinkButton>
+                            </li>
+                            <li>
+                                <asp:LinkButton ID="btnNotif" OnClick="btnNotif_Click" runat="server">Notification</asp:LinkButton>
+                            </li>--%>
+                            <li>
+                                <asp:LinkButton ID="facultyevalbtn" OnClick="facultyevalbtn_Click" runat="server"><i class="fa-solid fa-list-check"></i>&nbsp;&nbsp; Faculty Evaluation</asp:LinkButton>
+                            </li>
+                            <li>
+                                <asp:PlaceHolder ID="plcDeanResult" runat="server">
+                                    <a href="#DeanResult" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-percent"></i>&nbsp;&nbsp; Result</a>
+                                    <ul class="collapse list-unstyled" id="DeanResult">
+                                        <li>
+                                            <asp:LinkButton ID="btnStudEval" OnClick="btnStudEval_Click" runat="server">•&nbsp;&nbsp; Student Evaluation Result</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="btnPeerEval" OnClick="btnPeerEval_Click" runat="server">•&nbsp;&nbsp; Peers Evaluation Result</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="btnSelfEval" OnClick="btnSelfEval_Click" runat="server">•&nbsp;&nbsp; Self Evaluation Result</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="btnOverEval" OnClick="btnOverEval_Click" runat="server">•&nbsp;&nbsp; Overall Evaluation Result</asp:LinkButton>
+                                        </li>
+                                        <li>
+                                            <asp:LinkButton ID="skillsTestResult" OnClick="skillsTestResult_Click" runat="server">•&nbsp;&nbsp; Skills Test Result</asp:LinkButton>
+                                        </li>
+                                    </ul>
+
+                                </asp:PlaceHolder>
+                                <%--<asp:LinkButton ID="lbtnResults" OnClick="lbtnReports_Click" runat="server"><i class="fa-solid fa-percent"></i>&nbsp;&nbsp; Results</asp:LinkButton>--%>
+                            </li>
+                            <%--<li>
+                                <asp:LinkButton ID="lbtnReports" OnClick="lbtnReports_Click" runat="server"><i class="fa-solid fa-receipt"></i>&nbsp;&nbsp; Reports</asp:LinkButton>
+                            </li>--%>
+                            <%--<li>
+                                <asp:LinkButton ID="evaluatebtn" OnClick="evaluatebtn_Click" runat="server"><i class="fa-solid fa-list-check"></i>&nbsp;&nbsp; Evaluation</asp:LinkButton>
+                            </li>--%>
+                            <li>
+                                <asp:LinkButton ID="evaluatebtn2" OnClick="evaluatebtn2_Click" runat="server"><i class="fa-solid fa-list-check"></i>&nbsp;&nbsp; Evaluate</asp:LinkButton>
+                            </li>
+                            <%--<li>
+                                <asp:LinkButton ID="btnNotif" OnClick="btnNotif_Click" runat="server"><i class="fa-solid fa-bell"></i>&nbsp;&nbsp; Notification</asp:LinkButton>
+                            </li>--%>
+                        </ul>
+                        <div class="footer">
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Page Content  -->
+                <div id="content">
+
+                    <asp:ContentPlaceHolder ID="body" runat="server">
+                    </asp:ContentPlaceHolder>
+                    <button
+                        type="button"
+                        class="btn btn-warning btn-floating btn-lg rounded-circle"
+                        id="btn-back-to-top"
+                        style="color: orange !important"
+                        title="Back to top">
+                        <i class="fas fa-arrow-up" style="color: darkslategrey"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+    
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $("#logoutbtn").click(function () {
+            localStorage.clear();
+            sessionStorage.clear();
+        });
+    </script>
+    <script src="../../../Content/Sidebar/sidebarbootstrap.min.js"></script>
+    <script src="../../../Content/Sidebar/sidebarjquery.min.js"></script>
+    <script src="../../../Content/Sidebar/sidebarmain.js"></script>
+    <script src="../../../Content/Sidebar/sidebarpopper.js"></script>
+    <script>
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+        $(function () {
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+        })
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js" integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+    <script src="https://kit.fontawesome.com/288b588b0b.js" crossorigin="anonymous"></script>
+    <script src="/Scripts/BacktoTopBTN/backTotop.js"></script>
+</body>
+</html>

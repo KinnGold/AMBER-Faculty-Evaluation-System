@@ -1,0 +1,695 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="AmberMP.master.cs" Inherits="AMBER.BM.AmberMP" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <title>
+        <asp:ContentPlaceHolder ID="title" runat="server">
+        </asp:ContentPlaceHolder>
+    </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link href="~/Scripts/customscrollbar.css" rel="stylesheet" />
+    <link href="~/A.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link href="/Content/Sidebar/sidebarst.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="/Content/calendar/main.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.1.1/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/chart.js-plugin-labels-dv/dist/chartjs-plugin-labels.min.js"></script>
+    <style type="text/css">
+        #profilePic {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: 100% 100%;
+            overflow: hidden;
+        }
+
+        #schoolProfilePic {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border: 5px solid orange;
+            border-radius: 50%;
+            background-size: 100% 100%;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .item {
+            border: 1px solid #343A40;
+        }
+
+        .notif {
+            font-size: x-large;
+        }
+
+        .read {
+            margin-right: 227px;
+        }
+
+        .msg {
+            word-break: break-word;
+            white-space: normal;
+            text-align: justify;
+        }
+
+
+        .dropdown-menu-start {
+            top: 60px;
+            right: 0px;
+            left: unset;
+            width: 450px;
+            height: 360px;
+            box-shadow: 0px 5px 7px -1px #c1c1c1;
+            padding-bottom: 0px;
+            padding: 0px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
+            .dropdown-menu-start:before {
+                content: "";
+                position: absolute;
+                top: -20px;
+                right: 12px;
+                border: 10px solid #343A40;
+                border-color: transparent transparent #343A40 transparent;
+            }
+
+        .head {
+            padding: 5px 15px;
+            border-radius: 3px 3px 0px 0px;
+        }
+
+        .notification-box {
+            padding: 10px 0px;
+        }
+
+        .footer {
+            padding: 5px 15px;
+            border-radius: 0px 0px 3px 3px;
+            align-content: center;
+            position: fixed;
+        }
+
+        @media (max-width: 640px) {
+            .dropdown-menu-start {
+                top: 50px;
+                left: -16px;
+                width: 290px;
+            }
+
+            .message {
+                font-size: 13px;
+            }
+        }
+    </style>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth'
+            });
+            calendar.render();
+        });
+
+    </script>
+    <script>
+        var page = '<%= Session["temp"] %>';
+        var obj = { status: false, ele: null };
+        function error() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Under Maintenance',
+                text: 'Something went wrong!',
+            })
+        }
+        function Activated() {
+            Swal.fire({
+                position: 'center',
+                timer: 3000,
+                icon: 'success',
+                title: 'Skills Test Activation Successful',
+            })
+        }
+        function Deactivated() {
+            Swal.fire({
+                position: 'center',
+                timer: 3000,
+                icon: 'success',
+                title: 'Skills Test Deactivation Successful',
+            })
+        }
+        function errorPass() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 6000,
+                icon: 'error',
+                title: 'Oops!',
+                text: 'Password must be minimum of 8 and must contain atleast one Upper case and atleast one special character and numbers.',
+            })
+        }
+        function PassError() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'error',
+                title: 'Password Error!',
+                text: 'Password Does not Match!',
+            })
+        }
+        function invaliddept() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'warning',
+                title: 'Invalid Department!',
+                text: 'Please Select Department correctly!',
+            })
+        }
+        function invaliddean() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'warning',
+                title: 'Invalid Dean!',
+                text: 'Please Select Dean correctly!',
+            })
+        }
+        function invalidDate() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'warning',
+                title: 'Invalid Date!',
+                text: 'Please Select Date correctly!',
+            })
+        }
+        function invalidins() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'warning',
+                title: 'Invalid Instructor!',
+                text: 'Please Select Instructor correctly!',
+            })
+        }
+        function InsertSuccess() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'success',
+                title: page + ' Added Successfully',
+            })
+        }
+        function UpdateSuccess() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'success',
+                title: 'Updated Successfully',
+            })
+        }
+        function exist() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'warning',
+                title: page + ' Already Exist!',
+            })
+        }
+        function SendSuccess() {
+            Swal.fire({
+                position: 'center',
+                showConfirmButton: false,
+                timer: 3000,
+                icon: 'success',
+                title: 'Reply Sent Successfully',
+            })
+        }
+        function DeleteConfirm(btnDelete) {
+
+            if (obj.status) {
+                obj.status = false;
+                return true;
+            };
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this! There will be ' + page /*count unta ni siya*/ + ' rows affected',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+                    obj.status = true;
+                    //do postback on success
+                    obj.ele.click();
+                }
+            });
+            obj.ele = btnDelete;
+            return false;
+        }
+        function attempt() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Too many Login Attempts!',
+                text: 'Try again later.',
+            })
+        }
+        var object = {
+            status: false, ele: null
+        };
+        function LogoutConfirm(event) {
+            if (object.status) {
+                return true;
+            }
+            Swal.fire({
+                icon: 'warning',
+                title: 'Are you sure you want to logout?',
+                text: 'Your session will end.',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#FFBF00',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Log me out.'
+            }).then((result) => {
+                if (result.value) {
+                    object.status = true;
+                    object.ele = btnLogout;
+                    //do postback on success
+                    object.ele.click();
+                }
+            });
+            return false;
+        }
+
+        function profilepicerror() {
+            Swal.fire({
+                position: 'center',
+                icon: 'warning',
+                title: 'No File Chosen!',
+                showConfirmButton: false,
+                timer: 3000
+            })
+        }
+
+        function fileerror() {
+            Swal.fire({
+                position: 'center',
+                icon: 'warning',
+                title: 'Invalid File Type!',
+                showConfirmButton: false,
+                timer: 3000
+            })
+        }
+    </script>
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+    <link href="/Scripts/BacktoTopBTN/backTotop.css" rel="stylesheet" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-0 p-1 shadow-sm bg-white">
+                <%--<img src="../Pictures/CAPSTONER-Amber.png" style="height: auto; width: 90px;" class="img-fluid mx-3" />--%>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="nav navbar-nav m-2">
+                        <li class="nav-item">
+                            <p class=" m-0 py-2">
+                                Evaluation Status:
+                                <asp:Label ID="lblstatus" Font-Bold="true" runat="server" Text="No Schedule"></asp:Label>
+                            </p>
+                        </li>
+                    </ul>
+
+                    <ul class="nav navbar-nav ms-auto" style="margin-right: 2.8rem">
+                        <li class="nav-item m-2">
+                            <div class="dropdown show">
+                                <button class="btn btn-outline-secondary my-2 my-sm-0 dropdown-toggle border-0 align-items-center" href="#" role="button" id="dropdownMenuLink1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="badge rounded-pill badge-notification bg-danger">
+                                        <asp:Label ID="notifications1" runat="server" Text=""></asp:Label></span>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-start scrollbar-primary" aria-labelledby="dropdownMenuLink1">
+                                    <li class="dropdown-header head">
+                                        <div clas="row">
+                                            <div class="col">
+                                                <center>
+                                                    <span class="text-justify notif"><b>Notifications</b></span>
+                                                </center>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <asp:LinkButton ID="markasreadbtn" CssClass="read" OnClick="markasreadbtn_Click" runat="server">Mark All As Read</asp:LinkButton>
+                                                <asp:LinkButton ID="viewallbtn" OnClick="viewallbtn_Click" runat="server">View All</asp:LinkButton>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="notification-box">
+                                        <asp:PlaceHolder ID="plcnotifications" runat="server">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <asp:Repeater ID="Repeater1" runat="server">
+                                                        <ItemTemplate>
+                                                            <div class="dropdown-item item border-0">
+                                                                <div class="row">
+                                                                    <div class="col">
+                                                                        <span class="message media-body">
+                                                                            <span class="name float-left" style="font-size: large;">From: <b><%#Eval("first_name") %> <%#Eval("last_name") %> </b>(<%#Eval("user_role") %>)</span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col msg">
+                                                                        <p>
+                                                                            <%#Eval("message") %>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col">
+                                                                        <p style="font-size: smaller">
+                                                                            sent <%#Eval("DateTimeSent") %>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </ItemTemplate>
+                                                    </asp:Repeater>
+                                                </div>
+                                            </div>
+                                        </asp:PlaceHolder>
+
+                                        <asp:PlaceHolder ID="plcNOnotifications" runat="server">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <center>
+                                                        <p>
+                                                            <img src="/Pictures/notificationsring.png" style="height: 200px; width: 200px;" />
+
+                                                        </p>
+                                                        <h4>No Recent Notifications</h4>
+                                                    </center>
+                                                </div>
+                                            </div>
+                                        </asp:PlaceHolder>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown m-1">
+                            <div class="dropdown-center show">
+                                <div class="row">
+                                    <div class="col">
+                                        <button class="btn btn-outline-secondary border-0 my-2 my-sm-0 dropdown-toggle align-items-center" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <asp:Image ID="profilePic" runat="server" Width="40px" Height="40px" />
+                                            <asp:Label runat="server" CssClass="form-label" ID="lbluser"></asp:Label>
+                                        </button>
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                            <asp:LinkButton ID="adminprofilebtn" OnClick="adminprofilebtn_Click1" CssClass="dropdown-item" runat="server"><i class="fa fa-user"></i>&nbsp;&nbsp;Profile</asp:LinkButton>
+                                            <asp:LinkButton runat="server" ID="btnLogout" OnClientClick="return LogoutConfirm(this);" OnClick="btnLogout_Click" CssClass="dropdown-item"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;Logout</asp:LinkButton>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+            <div class="wrapper d-flex align-items-stretch">
+                <nav id="sidebar">
+                    <div class="custom-menu">
+                        <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                            <i class="fa fa-bars"></i>
+                            <span class="sr-only">Toggle Menu</span>
+                        </button>
+                    </div>
+                    <div class="row p-2">
+                        <center>
+                            <asp:Image ID="schoolProfilePic" runat="server" Width="140px" Height="140px" />
+                        </center>
+                        <div class="col text-center">
+                            <asp:Label runat="server" Style="font-size: medium;" CssClass="form-label" ID="lblschool"></asp:Label>
+                        </div>
+                    </div>
+                    <hr class="mx-3" />
+                    <div class="p-4" style="position: sticky; top: 0;">
+
+                        <%--<h1><img class="logo" src="../../Pictures/whiteCAPSTONER-Amber.png" style="max-width:100%;"/></h1>--%>
+                        <ul class="list-unstyled components mb-5">
+                            <li class="active">
+                                <a href="/Pages/AdminLandingPage.aspx"><i class="fa-solid fa-house"></i>&nbsp;&nbsp; Dashboard</a>
+                            </li>
+                            <asp:PlaceHolder ID="plcbulkupload" runat="server">
+                                <li>
+                                    <a href="#bulkuploadSubMenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-file"></i>&nbsp;&nbsp; Upload List</a>
+                                    <ul class="collapse list-unstyled" id="bulkuploadSubMenu">
+                                        <li>
+                                            <a href="/Pages/AdminBulkUpload.aspx">•&nbsp;&nbsp; Enrollment Record Upload</a>
+                                        </li>
+                                        <li>
+                                            <a href="/Pages/CategoryQuestionsUpload.aspx">•&nbsp;&nbsp; Category/Questions Upload</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </asp:PlaceHolder>
+                            <li>
+                                <a href="#UserSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-users"></i>&nbsp;&nbsp; Users</a>
+                                <ul class="collapse list-unstyled" id="UserSubmenu">
+                                    <asp:PlaceHolder ID="plcAddAdmin" runat="server">
+                                        <li>
+                                            <a href="/Pages/AddAdminUser.aspx"><i class="fa-solid fa-user-gear"></i>&nbsp;&nbsp; Add Admin User</a>
+                                        </li>
+                                    </asp:PlaceHolder>
+                                    <li>
+                                        <a href="/Pages/AdminInstructorPage.aspx">•&nbsp;&nbsp; Instructor</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/AdminStudentPage.aspx">•&nbsp;&nbsp; Student</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#courseSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-building-columns"></i>&nbsp;&nbsp; Manage</a>
+                                <ul class="collapse list-unstyled" id="courseSubmenu">
+                                    <li>
+                                        <a href="/Pages/Semesters.aspx">•&nbsp;&nbsp; Term</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/AdminDepartmentPage.aspx">•&nbsp;&nbsp; Department</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/AdminCoursePage.aspx">•&nbsp;&nbsp; Course</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/AdminSectionPage.aspx">•&nbsp;&nbsp; Section</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/Subjects.aspx">•&nbsp;&nbsp; Subjects</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/AdminSchedulePage.aspx">•&nbsp;&nbsp; Schedule</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <%--<li>
+                                <a href="AdminNotifications.aspx"><i class="fa-solid fa-bell"></i>&nbsp;&nbsp; Notifications<div class="badge rounded-pill bg-primary mx-1" runat="server" id="lblnotif">0</div></a>
+                            </li>--%>
+                            <%--<li>
+                                <a href="/Pages/AdminSkillsTest.aspx"><i class="fa-solid fa-square-check"></i>&nbsp;&nbsp; Skills Test</a>
+                            </li>--%>
+                            <li>
+                            <li>
+                                <a href="#EvalSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-list-check"></i>&nbsp;&nbsp; Evaluation</a>
+                                <ul class="collapse list-unstyled" id="EvalSubmenu">
+                                    <li>
+                                        <a href="/Pages/Semesters.aspx">•&nbsp;&nbsp; Evaluation Schedule</a>
+                                    </li>
+                                    <li>
+                                        <asp:PlaceHolder ID="plcevaluationlink" runat="server">
+                                            <a href="/Pages/EvaluationLink.aspx">•&nbsp;&nbsp; Generate Evaluation Link</a>
+                                        </asp:PlaceHolder>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/AdminConstructor.aspx">•&nbsp;&nbsp; Categories</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/AdminIndicator.aspx">•&nbsp;&nbsp; Questions</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#SkillsTestSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-square-check"></i>&nbsp;&nbsp; Skills Tests</a>
+                                <ul class="collapse list-unstyled" id="SkillsTestSubmenu">
+                                    <li>
+                                        <a href="/Pages/AdminSkillsTest.aspx">•&nbsp;&nbsp; Skills Test Request</a>
+                                    </li>
+                                    <li>
+                                        <asp:PlaceHolder ID="plcskillsTestResults" runat="server">
+                                            <a href="/Pages/AdminSkillsTestResults.aspx">•&nbsp;&nbsp; Skills Test Results</a>
+                                        </asp:PlaceHolder>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#EvalResultSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-chart-bar"></i>&nbsp;&nbsp; Evaluation Results</a>
+                                <ul class="collapse list-unstyled" id="EvalResultSubmenu">
+                                    <li>
+                                        <a href="/Pages/AdminRankingsPage.aspx">•&nbsp;&nbsp; Rankings</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/AdminDepartmentRanking.aspx">•&nbsp;&nbsp; Department Rankings</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/EvaluationSectionResult.aspx">•&nbsp;&nbsp; Student Evaluation Result</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/EvaluationPeerResult.aspx">•&nbsp;&nbsp; Peer Evaluation Result</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/EvaluationSelfResult.aspx">•&nbsp;&nbsp; Self Evaluation Result</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/EvaluationOverallResult.aspx">•&nbsp;&nbsp; Overall Evaluation Result</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#ReportsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"><i class="fa-solid fa-chart-simple"></i>&nbsp;&nbsp; Graphical Reports</a>
+                                <ul class="collapse list-unstyled" id="ReportsSubmenu">
+                                    <li>
+                                        <a href="/Pages/ConstructorReport.aspx">•&nbsp;&nbsp; Overall Report by Categories</a>
+                                    </li>
+                                    <li>
+                                        <a href="/Pages/Reports/VerbalCountPage.aspx">•&nbsp;&nbsp; Overall Department Verbal Interpretation</a>
+                                    </li>
+                                    <%--<li>
+                                        <a href="/Pages/Reports/OverallReports.aspx">•&nbsp;&nbsp; Overall Reports</a>
+                                    </li>--%>
+                                    <%--<li>
+                                        <a href="/Pages/Reports/DepartmentReport.aspx">•&nbsp;&nbsp; Department Reports</a>
+                                    </li>--%>
+                                </ul>
+                            </li>
+                            <asp:PlaceHolder ID="plcsubscription" runat="server">
+                                <li>
+                                    <a href="/Pages/SubscriptionDetails.aspx"><i class="fa-solid fa-credit-card"></i>&nbsp;&nbsp; Subscriptions</a>
+                                </li>
+                            </asp:PlaceHolder>
+                        </ul>
+                        <hr />
+                        <div class="row">
+                            <div class="col">
+                                <p text="text-justify text-black">
+                                    Powered by
+                                </p>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled CTAs pt-0" style="background-color:white; width:125px">
+                            <li>
+                                 <img src="/Pictures/CAPSTONER-Amber.png" style="height: auto; width: 90px;" class="img-fluid mx-3" />
+                            </li>
+                        </ul>
+                          <div class="row">
+                            <div class="col">
+                                <p text="text-justify text-black">
+                                    &copy All Rights Reserved <%= DateTime.Now.Year %> AMBER: Faculty Evaluation System.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </nav>
+
+                <!-- Page Content  -->
+                <div id="content">
+
+                    <asp:ContentPlaceHolder ID="body" runat="server">
+                    </asp:ContentPlaceHolder>
+                    <button
+                        type="button"
+                        class="btn btn-warning btn-floating btn-lg rounded-circle"
+                        id="btn-back-to-top"
+                        style="color: orange !important"
+                        title="Back to top">
+                        <i class="fas fa-arrow-up" style="color: darkslategrey"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        <%--<div class="modal fade" id="generateLink" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel2" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel2">Generate Link for Users</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="form-floating mb-3">
+                                <asp:TextBox ID="txtLink" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>
+                                <label for="txtLink">Link goes here</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <asp:Button ID="btnGenerate" CssClass="btn btn-success" ValidationGroup="RqEditName" runat="server" Text="Generate" OnClick="btnGenerate_Click"/>
+                    </div>
+                </div>
+            </div>
+        </div>--%>
+    </form>
+    <script src="/Content/Sidebar/sidebarjquery.min.js"></script>
+    <script src="/Content/Sidebar/sidebarpopper.js"></script>
+    <script src="/Content/Sidebar/sidebarbootstrap.min.js"></script>
+    <script src="/Content/Sidebar/sidebarmain.js"></script>
+    <script src="/Scripts/Calendar/Calendar.js"></script>
+    <script>
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+    <script src="/Scripts/Calendar/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js" integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+    <script src="https://kit.fontawesome.com/288b588b0b.js" crossorigin="anonymous"></script>
+    <script src="/Scripts/BacktoTopBTN/backTotop.js"></script>
+</body>
+</html>
